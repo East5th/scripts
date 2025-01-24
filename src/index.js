@@ -12,6 +12,7 @@ cli.register(Builtins.HelpCommand);
 cli.register(require('./commands/aws/login'));
 cli.register(require('./commands/aws/profile'));
 cli.register(require('./commands/aws/create-stack'));
+cli.register(require('./commands/aws/update-stack'));
 cli.register(require('./commands/cli/update'));
 
 cli.runExit(args);
