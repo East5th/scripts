@@ -22,7 +22,30 @@ module.exports = class extends Command {
 
   async execute() {
     let profile = await awsProfilePicker(this.context);
-    let name = await input({ message: "Stack name?" });
+    let stacks = child_process
+      .execSync(
+        `aws cloudformation list-stacks --profile "${profile}" --query "StackSummaries[?StackStatus!='DELETE_COMPLETE'].StackName" --output text`
+      )
+      .toString()
+      .trim()
+      .split("\t");
+
+    let name = await search({
+      message: "Which stack?",
+      source: async (input) => {
+        if (!input) {
+          return stacks;
+        }
+
+        return stacks
+          .filter((stack) => stack.toLowerCase().includes(input.toLowerCase()))
+          .map((stack) => ({
+            name: stack,
+            value: stack,
+          }));
+      },
+    });
+
     let path = await fileSelector({ message: "Template file?" });
 
     let spinner = yoctoSpinner({ text: `Updating "${name}" stack…` }).start();
@@ -36,4 +59,3 @@ module.exports = class extends Command {
     spinner.success(`Updated "${name} stack"!`);
   }
 };
-
